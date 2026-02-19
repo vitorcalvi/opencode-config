@@ -1,0 +1,252 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "theme": "tokyonight",
+  "logLevel": "WARN",
+  "default_agent": "sisyphus",
+  "model": "github-copilot/grok-code-fast-1",
+  "tui": {
+    "scroll_acceleration": {
+      "enabled": true
+    },
+    "diff_style": "auto"
+  },
+  "instructions": [
+    "~/.config/opencode/instructions/max-out-opencode.md"
+  ],
+  "provider": {
+    "zai-coding-plan": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Z.AI Coding Plan",
+      "options": {
+        "baseURL": "https://api.z.ai/api/coding/paas/v4/",
+        "apiKey": "${API_KEY_HERE}"
+      },
+      "models": {
+        "glm-5": {
+          "name": "GLM-5",
+          "maxTokens": 128000
+        },
+        "glm-4.7": {
+          "name": "GLM-4.7",
+          "maxTokens": 128000
+        }
+      }
+    },
+    "github-copilot": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "GitHub Copilot",
+      "options": {
+        "baseURL": "https://api.githubcopilot.com",
+        "apiKey": "${API_KEY_HERE}"
+      },
+      "models": {
+        "gpt-5-mini": {
+          "name": "gpt-5-mini",
+          "maxTokens": 8192
+        },
+        "grok-code-fast-1": {
+          "name": "grok-code-fast-1",
+          "maxTokens": 262144
+        }
+      }
+    },
+    "google": {
+      "npm": "@ai-sdk/google",
+      "name": "Google Gemini",
+      "models": {
+        "antigravity-gemini-3-pro": {
+          "name": "Gemini 3 Pro (Antigravity)",
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "variants": {
+            "low": {
+              "thinkingLevel": "low"
+            },
+            "high": {
+              "thinkingLevel": "high"
+            }
+          }
+        },
+        "antigravity-gemini-3-flash": {
+          "name": "Gemini 3 Flash (Antigravity)",
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "variants": {
+            "minimal": {
+              "thinkingLevel": "minimal"
+            },
+            "low": {
+              "thinkingLevel": "low"
+            },
+            "medium": {
+              "thinkingLevel": "medium"
+            },
+            "high": {
+              "thinkingLevel": "high"
+            }
+          }
+        },
+        "gemini-3-pro-preview": {
+          "name": "Gemini 3 Pro Preview (Gemini CLI)",
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "keybinds": {
+    "variant_cycle": "ctrl+t",
+    "sidebar_toggle": "ctrl+b",
+    "editor_open": "ctrl+e",
+    "session_new": "ctrl+n",
+    "status_view": "ctrl+s"
+  },
+  "plugin": [
+    "oh-my-opencode@3.5.2",
+    "opencode-pty@0.1.4",
+    "opencode-agent-browser",
+    "opencode-antigravity-auth@latest"
+  ],
+  "mcp": {
+    "filesystem": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/"
+      ],
+      "enabled": true
+    },
+    "memory": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "environment": {
+        "MEMORY_FILE_PATH": "/Users/vitorcalvi/.config/opencode/memory.json"
+      },
+      "enabled": true
+    },
+    "git-mcp": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "git-mcp"
+      ],
+      "enabled": true
+    },
+    "github": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "enabled": true
+    },
+    "qdrant": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "better-qdrant-mcp-server"
+      ],
+      "environment": {
+        "QDRANT_URL": "http://192.168.20.10:6333",
+        "QDRANT_HOST": "192.168.20.10",
+        "QDRANT_PORT": "6333"
+      },
+      "enabled": true
+    }
+  },
+  "agent": {
+    "sisyphus": {
+      "description": "Primary orchestrator. Dispatches to 10 Alpine workers for parallel code generation.",
+      "mode": "primary",
+      "model": "github-copilot/grok-code-fast-1",
+      "temperature": 0.3
+    },
+    "speed_reader": {
+      "description": "GLM-5 for rapid coding and analysis (55+ tok/sec)",
+      "mode": "subagent",
+      "model": "zai-coding-plan/glm-5",
+      "temperature": 0.3
+    },
+    "opencoder": {
+      "description": "Graph-aware coder using GPT-5-mini. Primary implementation agent for code changes.",
+      "mode": "subagent",
+      "model": "github-copilot/gpt-5-mini",
+      "temperature": 0.2
+    },
+    "oracle": {
+      "description": "Research specialist using GLM-4.7. Invoked for API lookups and documentation.",
+      "mode": "subagent",
+      "model": "zai-coding-plan/glm-4.7",
+      "temperature": 0.3
+    },
+    "fast_coder_grok": {
+      "description": "Agentic coding agent with 256K context for complex multi-step tasks.",
+      "mode": "subagent",
+      "model": "github-copilot/grok-code-fast-1",
+      "temperature": 0.2,
+      "maxTokens": 262144
+    }
+  },
+  "permission": {
+    "edit": "allow",
+    "read": "allow",
+    "bash": {
+      "*": "allow",
+      "git": "allow",
+      "rm": "allow",
+      "chmod": "allow"
+    },
+    "webfetch": "allow",
+    "websearch": "allow",
+    "codesearch": "allow",
+    "lsp": "allow",
+    "grep": "allow",
+    "mcp": "allow",
+    "doom_loop": "allow"
+  }
+}

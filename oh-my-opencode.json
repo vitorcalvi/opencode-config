@@ -1,0 +1,172 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  "google_auth": false,
+  "orchestration": {
+    "enabled": true,
+    "mode": "distributed",
+    "agent_farm": {
+      "host": "root@192.168.20.10",
+      "max_concurrent_workers": 10,
+      "workdir_base": "/root/opencode-workers",
+      "ssh_options": {
+        "control_master": "auto",
+        "control_path": "/tmp/ssh-%r@%h:%p",
+        "control_persist": "600"
+      }
+    },
+    "defaults": {
+      "worker_count": 10,
+      "heartbeat_interval": 5,
+      "heartbeat_timeout": 30,
+      "poll_interval": 2,
+      "tmux_monitoring": true
+    }
+  },
+  "experimental": {
+    "auto_resume": true,
+    "parallel_execution": true
+  },
+  "sisyphus_agent": {
+    "default_builder_enabled": true,
+    "planner_enabled": true,
+    "orchestration": {
+      "mode": "parallel",
+      "max_concurrent_agents": 5
+    }
+  },
+  "context_strategy": {
+    "shared": [
+      "package.json",
+      "tsconfig.json",
+      "README.md",
+      "MEMORY.md",
+      "BUN_MIGRATION_PLAN.md"
+    ],
+    "agent_specific": {
+      "opencoder": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.js",
+        "frontend/**/*.tsx"
+      ],
+      "oracle": [
+        "docs/**",
+        "*.md",
+        "README.md"
+      ],
+      "speed_reader": [
+        "**/*.json",
+        "**/*.md"
+      ]
+    }
+  },
+  "defaults": {
+    "primary_agent": "sisyphus",
+    "coding_agent": "opencoder",
+    "research_agent": "oracle"
+  },
+  "agents": {
+    "sisyphus": {
+      "model": "zai-coding-plan/glm-4.7",
+      "role": "engineering_manager",
+      "capabilities": [
+        "planning",
+        "delegation",
+        "review",
+        "orchestration"
+      ],
+      "description": "Primary orchestrator with reasoning enabled. Plans multi-step solutions via symbolic delegation. High reasoning (150 steps). Delegates to specialized agents for parallel execution.",
+      "performance": {
+        "timeout_ms": 60000,
+        "temperature": 0.3,
+        "parallel_sessions": 15,
+        "memory_limit_mb": 2048
+      },
+      "permissions": {
+        "bash": {
+          "*": "allow",
+          "rm": "allow"
+        },
+        "edit": "allow",
+        "lsp": "allow",
+        "codesearch": "allow",
+        "doom_loop": "allow"
+      }
+    },
+    "opencoder": {
+      "model": "github-copilot/gpt-5-mini",
+      "role": "implementation",
+      "capabilities": [
+        "coding",
+        "refactoring",
+        "testing",
+        "debugging"
+      ],
+      "description": "Graph-aware coder using GPT-5-mini. Follows AST/LSP call hierarchies to prevent hallucinations. Primary implementation agent for all code changes.",
+      "permissions": {
+        "bash": "allow",
+        "edit": "allow",
+        "lsp": "allow",
+        "codesearch": "allow",
+        "grep": "allow"
+      }
+    },
+    "oracle": {
+      "model": "zai-coding-plan/glm-4.7",
+      "role": "research_specialist",
+      "capabilities": [
+        "research",
+        "documentation",
+        "web_search",
+        "context_gathering"
+      ],
+      "description": "Research specialist. Accesses live web + Context7 for verified documentation. Balanced performance for web search. Invoked for API lookups, best practices, and external documentation.",
+      "trigger_conditions": {
+        "manual_flag": true,
+        "uncertainty_threshold": 0.7
+      },
+      "permissions": {
+        "webfetch": "allow",
+        "read": "allow"
+      }
+    },
+    "speed_reader": {
+      "model": "zai-coding-plan/glm-5",
+      "role": "analyzer",
+      "capabilities": [
+        "analysis",
+        "summarization",
+        "quick_read"
+      ],
+      "description": "Ultra-fast lightweight agent for quick code analysis and summarization. Speed-critical tasks. Used for initial codebase exploration and quick context gathering.",
+      "permissions": {
+        "read": "allow",
+        "grep": "allow",
+        "glob": "allow"
+      }
+    },
+    "fast_coder_grok": {
+      "model": "github-copilot/grok-code-fast-1",
+      "role": "complex_implementation",
+      "capabilities": [
+        "complex_coding",
+        "large_context",
+        "reasoning_loops",
+        "parallel_tools"
+      ],
+      "description": "Agentic coding agent with 256K context. Supports reasoning loops and parallel tool execution. Best for complex multi-step tasks and large codebase analysis. Invoked for architectural changes.",
+      "trigger_conditions": {
+        "change_size": "> 100 lines",
+        "file_count": "> 5",
+        "manual_flag": true
+      },
+      "permissions": {
+        "bash": "allow",
+        "edit": "allow",
+        "grep": "allow",
+        "read": "allow",
+        "codesearch": "allow"
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+bun.lock
+package-lock.json
+
+# Sensitive files - NEVER COMMIT
+antigravity-accounts.json
+antigravity-accounts.json.*.tmp
+antigravity-signature-cache.json
+antigravity-logs/
+memory.json
+
+# Config with secrets - use example instead
+opencode.json
+
+# OS files
+.DS_Store
+
+# Build artifacts
+dist/
+*.tsbuildinfo
