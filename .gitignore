@@ -19,4 +19,7 @@ opencode.json
 # Build artifacts
 dist/
 *.tsbuildinfo
-.gitignore
+
+# Logs
+*.log
+npm-debug.log*
